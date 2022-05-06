@@ -2,7 +2,7 @@ import { generateRandomString, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
-let state 
+let state = '59a4c5c38268b45d85772d3728d7be34a7b6f0bdb77a43b4a9f9da54'
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 
@@ -35,12 +35,10 @@ const Spotify = {
     },
 
     getAuthCode() {
-        console.log('state ', this.getAuthState())
         if (this.parseWindow()) { 
             return this.parseWindow()                  
         } else {
-            console.log('state inside else ', this.getAuthState())
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${this.getAuthState()}&redirect_uri=${redirectURI}`
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${state}&redirect_uri=${redirectURI}`
             return this.parseWindow()    
         }  
     },
@@ -62,11 +60,10 @@ const Spotify = {
         const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
         if (authCodeMatch && authStateMatch) {
-                console.log('state in the parse ', state)
-                console.log('authStateMatch ',authStateMatch[1])
+            if (authStateMatch[1] === state) {
                 authCode = authCodeMatch[1]
                 return authCode
-
+            }
         }
         if (accessTokenMatch && expiresInMatch) { 
             accessToken = accessTokenMatch[1]
