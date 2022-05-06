@@ -1,7 +1,8 @@
+import { generateRandomString, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
-const state = '123456789qwertyxyz'
+const state = generateRandomString()
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 

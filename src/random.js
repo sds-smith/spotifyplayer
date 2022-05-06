@@ -5,7 +5,7 @@ function generateRandomString() {
   }
 
   function dec2hex(dec) {
-    return ('0' + dec.toString(16)).substr(-2)
+    return ('0' + dec.toString(16)).slice(-2)
   }
 
   function sha256(plain) { // returns promise ArrayBuffer
@@ -24,8 +24,8 @@ function generateRandomString() {
   }
 
   async function pkce_challenge_from_verifier(v) {
-    hashed = await sha256(v);
-    base64encoded = base64urlencode(hashed);
+    const hashed = await sha256(v);
+    const base64encoded = base64urlencode(hashed);
     return base64encoded;
   }
 
