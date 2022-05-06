@@ -2,8 +2,9 @@ import { generateRandomString, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
+const clientId = process.env.REACT_APP_CLIENT_ID
 const randomString = generateRandomString()
-let codeVerifier = ''.concat(randomString)
+const codeVerifier = ''.concat(randomString)
 const codeChallenge = pkce_challenge_from_verifier(codeVerifier)
 const state = process.env.REACT_APP_AUTH_STATE
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
@@ -23,7 +24,7 @@ const Spotify = {
         if (this.parseWindow()) { 
             return this.parseWindow()                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=token&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&redirect_uri=${redirectURI}`
+            window.location = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectURI}`
             return this.parseWindow()    
         }             
     },
@@ -33,7 +34,18 @@ const Spotify = {
             return accessToken
         } else {
             authCode = this.getAuthCode()
-            
+            return fetch(`https://api.spotify.com/v1/api/token`,
+            {
+                headers : headers,
+                method : 'POST',
+                body : JSON.stringify({
+                    grant_type : authorization_code,
+                    code : authCode,
+                    redirect_uri : redirectURI,
+                    client_id : clientId,
+                    code_verifier : codeVerifier
+                })
+            })
         }           
     },
 
