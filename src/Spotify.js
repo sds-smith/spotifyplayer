@@ -2,7 +2,7 @@ import { generateRandomString, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
-const state = '59a4c5c38268b45d85772d3728d7be34a7b6f0bdb77a43b4a9f9da54'
+const state = process.env.REACT_APP_AUTH_STATE
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 
@@ -60,6 +60,8 @@ const Spotify = {
         const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
         if (authCodeMatch && authStateMatch) {
+            console.log('state ', state)
+            console.log('authStateMatch ',authStateMatch[1])
             if (authStateMatch[1] === state) {
                 authCode = authCodeMatch[1]
                 return authCode
