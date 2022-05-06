@@ -36,10 +36,10 @@ const Spotify = {
             authCode = this.getAuthCode()
             return fetch(`https://api.spotify.com/v1/api/token`,
             {
-                headers : headers,
+                // headers : headers,
                 method : 'POST',
                 body : JSON.stringify({
-                    grant_type : authorization_code,
+                    grant_type : 'authorization_code',
                     code : authCode,
                     redirect_uri : redirectURI,
                     client_id : clientId,
@@ -89,13 +89,6 @@ const Spotify = {
             window.history.pushState("Access Token", null, "/")
             return accessToken  
         }     
-    },
-
-    getAuthState() {
-        if (!state) {
-            state = generateRandomString()
-        }
-        return state
     },
 
     hasAccessToken() {
