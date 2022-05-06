@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Spotify from './Spotify.js'
 import UserProfile from './UserProfile/UserProfile';
-import ProfilePic from '../icons/default_profile96.png'
+import ProfilePic from './icons/default_profile96.png'
 import './App.css';
 
 function App() {
