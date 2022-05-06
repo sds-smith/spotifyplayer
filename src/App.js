@@ -9,10 +9,9 @@ function App() {
 
   const [profilePic, setProfilePic] = useState(ProfilePic)
   const [userName, setUserName] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  const login = () => {
-    Spotify.getAccessToken().then(setIsLoggedIn(true))
+  const getAccessToken = () => {
+    Spotify.getAccessToken()
   }
 
   const getProfileInfo = () => {
@@ -25,7 +24,7 @@ function App() {
   }
 
   let userProfile
-  if (isLoggedIn) {
+  // if (isLoggedIn) {
     userProfile = (
       <UserProfile 
         getProfileInfo={getProfileInfo}
@@ -33,16 +32,16 @@ function App() {
         userName={userName}
       />      
     )
-  } else {
-    userProfile = (
-      <h1>Please Log In</h1>
-    )
-  }
+  // } else {
+    // userProfile = (
+      // <h1>Please Log In</h1>
+    // )
+  // }
 
   return (
     <div className="App">
       <header className="App-header">
-          <button onClick={login}>LOGIN</button>
+          {/* <button onClick={getAccessToken}>LOGIN</button> */}
           {userProfile}
       </header>
     </div>
