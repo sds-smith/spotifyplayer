@@ -28,7 +28,8 @@ const Spotify = {
         if (accessToken) {
             return accessToken
         } else {
-            this.getAuthCode()
+            authCode = this.getAuthCode()
+
         }           
     },
 
@@ -57,9 +58,7 @@ const Spotify = {
         const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
         if (authCodeMatch) {
-            console.log('authCode=', authCodeMatch[1])
             authCode = authCodeMatch[1]
-            window.history.pushState("Authorization Code", null, "/")
             return authCode
         }
         if (accessTokenMatch && expiresInMatch) { 
