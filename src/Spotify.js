@@ -2,7 +2,7 @@ import { generateRandomString, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
-const state = generateRandomString()
+let state 
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 
@@ -35,10 +35,12 @@ const Spotify = {
     },
 
     getAuthCode() {
+        console.log('state ', this.getAuthState())
         if (this.parseWindow()) { 
             return this.parseWindow()                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${state}&redirect_uri=${redirectURI}`
+            console.log('state inside else ', this.getAuthState())
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${this.getAuthState()}&redirect_uri=${redirectURI}`
             return this.parseWindow()    
         }  
     },
@@ -56,11 +58,15 @@ const Spotify = {
 
     parseWindow() {
         const authCodeMatch = window.location.href.match(/code=([^&]*)/)
+        const authStateMatch = window.location.href.match(/state=([^&]*)/)
         const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
-        if (authCodeMatch) {
-            authCode = authCodeMatch[1]
-            return authCode
+        if (authCodeMatch && authStateMatch) {
+                console.log('state in the parse ', state)
+                console.log('authStateMatch ',authStateMatch[1])
+                authCode = authCodeMatch[1]
+                return authCode
+
         }
         if (accessTokenMatch && expiresInMatch) { 
             accessToken = accessTokenMatch[1]
@@ -69,6 +75,13 @@ const Spotify = {
             window.history.pushState("Access Token", null, "/")
             return accessToken  
         }     
+    },
+
+    getAuthState() {
+        if (!state) {
+            state = generateRandomString()
+        }
+        return state
     },
 
     hasAccessToken() {
