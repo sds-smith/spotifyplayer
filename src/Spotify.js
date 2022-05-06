@@ -1,45 +1,44 @@
 
-
+let authCode
 let accessToken
+const state = '123456789qwertyxyz'
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 
-
-
 const Spotify = {
 
-    hasAccessToken() {
-        if (accessToken) {
-            return true
-        } else if (this.parseAccessToken()) {
-            return true
-        } else {
-            return false
-        }
-    },
-
-    parseAccessToken() {
-        const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
-        const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
-        if (accessTokenMatch && expiresInMatch) { 
-            accessToken = accessTokenMatch[1]
-            const expiresIn = Number(expiresInMatch[1])
-            window.setTimeout(() => accessToken = '', expiresIn * 1000)
-            window.history.pushState("Access Token", null, "/")
-            return accessToken  
-        }     
-    },
-
     getAccessToken() {
+        // return this.getImplicitToken()
+        return this.getCodeToken()
+    },
+
+    getImplicitToken() {
         if (accessToken) {
             return accessToken
         }
-        if (this.parseAccessToken()) { 
-            return this.parseAccessToken()                  
+        if (this.parseWindow()) { 
+            return this.parseWindow()                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&response_type=token&scope=${scope}&redirect_uri=${redirectURI}`
-            return this.parseAccessToken()    
+            window.location = `https://accounts.spotify.com/authorize?response_type=token&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&redirect_uri=${redirectURI}`
+            return this.parseWindow()    
         }             
+    },
+
+    getCodeToken() {
+        if (accessToken) {
+            return accessToken
+        } else {
+            this.getAuthCode()
+        }           
+    },
+
+    getAuthCode() {
+        if (this.parseWindow()) { 
+            return this.parseWindow()                  
+        } else {
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${state}&redirect_uri=${redirectURI}`
+            return this.parseWindow()    
+        }  
     },
 
     getProfileInfo() {
@@ -52,6 +51,35 @@ const Spotify = {
                 return jsonResponse
             })
     },
+
+    parseWindow() {
+        const authCodeMatch = window.location.href.match(/code=([^&]*)/)
+        const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
+        const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
+        if (authCodeMatch) {
+            console.log('authCode=', authCodeMatch[1])
+            authCode = authCodeMatch[1]
+            window.history.pushState("Authorization Code", null, "/")
+            return authCode
+        }
+        if (accessTokenMatch && expiresInMatch) { 
+            accessToken = accessTokenMatch[1]
+            const expiresIn = Number(expiresInMatch[1])
+            window.setTimeout(() => accessToken = '', expiresIn * 1000)
+            window.history.pushState("Access Token", null, "/")
+            return accessToken  
+        }     
+    },
+
+    hasAccessToken() {
+        if (accessToken) {
+            return true
+        } else if (this.parseWindow()) {
+            return true
+        } else {
+            return false
+        }
+    }
 }
 
 export default Spotify
