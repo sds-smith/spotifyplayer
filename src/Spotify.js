@@ -1,11 +1,14 @@
-import { generateRandomString, pkce_challenge_from_verifier } from './random'
+import { generateRandomString, base64urlencode, pkce_challenge_from_verifier } from './random'
 
 let authCode
 let accessToken
 const clientId = process.env.REACT_APP_CLIENT_ID
+const clientSecret = process.env.REACT_APP_CLIENT_SECRET
 const randomString = generateRandomString()
 const codeVerifier = ''.concat(randomString)
+console.log('codeVerifier at step 1 ',codeVerifier)
 const codeChallenge = pkce_challenge_from_verifier(codeVerifier)
+console.log(codeChallenge)
 const state = process.env.REACT_APP_AUTH_STATE
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
@@ -34,26 +37,33 @@ const Spotify = {
             return accessToken
         } else {
             authCode = this.getAuthCode()
-            return fetch(`https://api.spotify.com/v1/api/token`,
+            const authorization = base64urlencode(`${clientId}:${clientSecret}`)
+            const headers = {
+                'Authorization' : authorization,
+                'Content-Type' : 'application/x-www-form-urlencoded'
+            }
+            console.log('codeVerifier at step 2 ',codeVerifier)
+            return fetch(`https://accounts.spotify.com/api/token`,
             {
-                // headers : headers,
+                headers : headers,
                 method : 'POST',
-                body : JSON.stringify({
-                    grant_type : 'authorization_code',
-                    code : authCode,
-                    redirect_uri : redirectURI,
-                    client_id : clientId,
-                    code_verifier : codeVerifier
-                })
+                body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
+            })
+            .then(response => response.json())                
+            .then(jsonResponse => {
+                console.log('codeVerifier at step 3 ',codeVerifier)
+                console.log(jsonResponse)
             })
         }           
     },
 
     getAuthCode() {
-        if (this.parseWindow()) { 
+        if (this.authCode) {
+            return authCode
+        } else if (this.parseWindow()) { 
             return this.parseWindow()                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${process.env.REACT_APP_CLIENT_ID}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&redirect_uri=${redirectURI}`
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&redirect_uri=${redirectURI}`
             return this.parseWindow()    
         }  
     },
@@ -75,8 +85,6 @@ const Spotify = {
         const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
         if (authCodeMatch && authStateMatch) {
-            console.log('state ', state)
-            console.log('authStateMatch ',authStateMatch[1])
             if (authStateMatch[1] === state) {
                 authCode = authCodeMatch[1]
                 return authCode

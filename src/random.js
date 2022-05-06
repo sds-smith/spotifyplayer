@@ -1,3 +1,6 @@
+
+
+
 function generateRandomString() {
     var array = new Uint32Array(56/2);
     window.crypto.getRandomValues(array);
@@ -29,4 +32,4 @@ function generateRandomString() {
     return base64encoded;
   }
 
-export { generateRandomString, pkce_challenge_from_verifier }
+export { generateRandomString, base64urlencode, pkce_challenge_from_verifier }
