@@ -1,10 +1,10 @@
 import { generateRandomString, base64urlencode, generateCodeChallenge, base64URL, pkce_challenge_from_verifier } from './random'
 
 let authCode
-let codeVerifier = process.env.REACT_APP_AUTH_VERIFIER
-let codeChallenge = process.env.REACT_APP_AUTH_CHALLENGE
 let accessToken
 let refreshToken
+const codeVerifier = process.env.REACT_APP_AUTH_VERIFIER
+const codeChallenge = process.env.REACT_APP_AUTH_CHALLENGE
 const clientId = process.env.REACT_APP_CLIENT_ID
 const clientSecret = process.env.REACT_APP_CLIENT_SECRET
 const state = process.env.REACT_APP_AUTH_STATE
@@ -14,12 +14,15 @@ const scope = process.env.REACT_APP_EXPANDED_SCOPE
 const Spotify = {
 
     getAccessToken() {
-        if (accessToken) {
-            return accessToken
-        } else {
-            // return this.getImplicitToken()
-                return this.getCodeToken()
-        }
+        // if (accessToken) {
+            // return accessToken
+        // } else {
+            return this.getCodeToken()
+            .then(token => {
+                accessToken = token
+                return accessToken
+            })
+        // }
     },
 
     getImplicitToken() {
@@ -35,17 +38,14 @@ const Spotify = {
     },
 
     getCodeToken() {
-        if (accessToken) {
-            return accessToken
-        } else {
-            authCode = this.getAuthCode()
+            const authCode = this.getAuthCode()
             const authorization = base64urlencode(`${clientId}:${clientSecret}`)
             const headers = {
                 'Authorization' : authorization,
                 'Content-Type' : 'application/x-www-form-urlencoded'
             }
             try {
-                fetch(`https://accounts.spotify.com/api/token`,
+                return fetch(`https://accounts.spotify.com/api/token`,
                 {
                     headers : headers,
                     method : 'POST',
@@ -53,27 +53,37 @@ const Spotify = {
                 })
                 .then(response => response.json())                
                 .then(jsonResponse => {
+                    this.resetAuthCode()
                     if (!jsonResponse.error) {
                         accessToken = jsonResponse.access_token
                         refreshToken = jsonResponse.refresh_token
+                        const expiresIn = jsonResponse.expires_in
+                        window.setTimeout(() => accessToken = '', expiresIn * 1000)
+                        return accessToken
                     }
                 })   
             } catch(error) {
                 console.log(error)
             } 
-        }           
+        // }           
     },
 
     getAuthCode() {
         if (authCode) {
             return authCode
         } else if (this.parseWindow()) { 
+            authCode = this.parseWindow()
             return authCode                  
         } else {
             // codeChallenge = this.getCodeChallenge()
             window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&redirect_uri=${redirectURI}`
-            return this.parseWindow()
+            authCode = this.parseWindow()
+            return authCode
         }  
+    },
+
+    resetAuthCode() {
+        authCode = ''
     },
 
     // getCodeChallenge() {
@@ -96,14 +106,14 @@ const Spotify = {
     // },
 
     getProfileInfo() {
-        const accessToken = this.getAccessToken()
-        const headers = { Authorization : `Bearer ${accessToken}` }
-
-        return fetch('https://api.spotify.com/v1/me',{headers : headers}
-        ).then(response => response.json()
-            ).then(jsonResponse => {
-                return jsonResponse
-            })
+        //const accessToken = this.getAccessToken()
+            
+            const headers = { Authorization : `Bearer ${accessToken}` }
+            return fetch('https://api.spotify.com/v1/me',{headers : headers}
+            ).then(response => response.json()
+                ).then(jsonResponse => {
+                    return jsonResponse
+                })        
     },
 
     parseWindow() {
@@ -113,7 +123,7 @@ const Spotify = {
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
         if (authCodeMatch && authStateMatch) {
             if (authStateMatch[1] === state) {
-                authCode = authCodeMatch[1]
+                const authCode = authCodeMatch[1]
                 return authCode
             }
         }

@@ -7,12 +7,18 @@ import './App.css';
 
 function App() {
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [profilePic, setProfilePic] = useState(ProfilePic)
   const [userName, setUserName] = useState('')
 
 
   const login = () => {
     Spotify.getAccessToken()
+    .then(() => {
+      if (Spotify.hasAccessToken()) {
+      setIsLoggedIn(true)
+      }
+    })
   }
 
   const getProfileInfo = () => {
@@ -26,12 +32,7 @@ function App() {
 
   let userProfile
 
-
-  useEffect(() => {
-    login()
-  }, [])
-
-    if (Spotify.hasAccessToken()) {
+    if (isLoggedIn) {
       userProfile = (
         <UserProfile 
           getProfileInfo={getProfileInfo}
@@ -40,13 +41,22 @@ function App() {
         />  
       ) 
     } else {
-      userProfile = <h1>Please Log In</h1>
+      userProfile = (
+        <div>
+          <h1>Please Log In</h1>
+          <button onClick={login}>LOGIN</button>
+        </div>
+      )
     }
+
+    useEffect(() => {
+      Spotify.getAuthCode()
+    }, [])
 
   return (
     <div className="App">
       <header className="App-header">
-        { userProfile }     
+        { userProfile }
       </header>
     </div>
   );
