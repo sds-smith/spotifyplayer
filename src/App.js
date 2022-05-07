@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Spotify from './Spotify.js'
 import UserProfile from './UserProfile/UserProfile';
 import ProfilePic from './icons/default_profile96.png'
@@ -10,7 +10,7 @@ function App() {
   const [profilePic, setProfilePic] = useState(ProfilePic)
   const [userName, setUserName] = useState('')
 
-  const getAccessToken = () => {
+  const login = () => {
     Spotify.getAccessToken()
   }
 
@@ -24,25 +24,26 @@ function App() {
   }
 
   let userProfile
-  // if (isLoggedIn) {
+  if (Spotify.hasAccessToken()) {
     userProfile = (
       <UserProfile 
         getProfileInfo={getProfileInfo}
         profilePic={profilePic}
         userName={userName}
-      />      
-    )
-  // } else {
-    // userProfile = (
-      // <h1>Please Log In</h1>
-    // )
-  // }
+      />  
+    ) 
+  } else {
+    userProfile = <h1>Please Log In</h1>
+  }
+
+  useEffect(() => {
+    login()
+  }, [])
 
   return (
     <div className="App">
       <header className="App-header">
-          {/* <button onClick={getAccessToken}>LOGIN</button> */}
-          {userProfile}
+        { userProfile }     
       </header>
     </div>
   );

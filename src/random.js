@@ -1,9 +1,9 @@
-
+import CryptoJS from 'crypto-js'
 
 
 function generateRandomString() {
     var array = new Uint32Array(56/2);
-    window.crypto.getRandomValues(array);
+    crypto.getRandomValues(array);
     return Array.from(array, dec2hex).join('');
   }
 
@@ -14,7 +14,7 @@ function generateRandomString() {
   function sha256(plain) { // returns promise ArrayBuffer
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
-    return window.crypto.subtle.digest('SHA-256', data);
+    return crypto.subtle.digest('SHA-256', data);
   }
 
   function base64urlencode(a) {
@@ -32,4 +32,13 @@ function generateRandomString() {
     return base64encoded;
   }
 
-export { generateRandomString, base64urlencode, pkce_challenge_from_verifier }
+  function generateCodeChallenge(code_verifier) {
+    const code_challenge = base64URL(CryptoJS.SHA256(code_verifier))
+    return code_challenge
+  }
+
+  function base64URL(string) {
+    return string.toString(CryptoJS.enc.Base64).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+  }
+
+export { generateRandomString, base64urlencode, generateCodeChallenge, base64URL, pkce_challenge_from_verifier }

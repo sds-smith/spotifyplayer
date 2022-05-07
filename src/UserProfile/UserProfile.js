@@ -11,6 +11,7 @@ class UserProfile extends React.Component {
     getProfileInfo() {
         this.props.getProfileInfo()
     }
+    
     componentDidMount() {
         this.getProfileInfo()
     }

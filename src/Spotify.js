@@ -1,14 +1,12 @@
-import { generateRandomString, base64urlencode, pkce_challenge_from_verifier } from './random'
+import { generateRandomString, base64urlencode, generateCodeChallenge, base64URL, pkce_challenge_from_verifier } from './random'
 
 let authCode
+let codeVerifier = process.env.REACT_APP_AUTH_VERIFIER
+let codeChallenge = process.env.REACT_APP_AUTH_CHALLENGE
 let accessToken
+let refreshToken
 const clientId = process.env.REACT_APP_CLIENT_ID
 const clientSecret = process.env.REACT_APP_CLIENT_SECRET
-const randomString = generateRandomString()
-const codeVerifier = ''.concat(randomString)
-console.log('codeVerifier at step 1 ',codeVerifier)
-const codeChallenge = pkce_challenge_from_verifier(codeVerifier)
-console.log(codeChallenge)
 const state = process.env.REACT_APP_AUTH_STATE
 const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
@@ -16,8 +14,12 @@ const scope = process.env.REACT_APP_EXPANDED_SCOPE
 const Spotify = {
 
     getAccessToken() {
-        // return this.getImplicitToken()
-        return this.getCodeToken()
+        if (accessToken) {
+            return accessToken
+        } else {
+            // return this.getImplicitToken()
+                return this.getCodeToken()
+        }
     },
 
     getImplicitToken() {
@@ -42,31 +44,56 @@ const Spotify = {
                 'Authorization' : authorization,
                 'Content-Type' : 'application/x-www-form-urlencoded'
             }
-            console.log('codeVerifier at step 2 ',codeVerifier)
-            return fetch(`https://accounts.spotify.com/api/token`,
-            {
-                headers : headers,
-                method : 'POST',
-                body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
-            })
-            .then(response => response.json())                
-            .then(jsonResponse => {
-                console.log('codeVerifier at step 3 ',codeVerifier)
-                console.log(jsonResponse)
-            })
+            try {
+                fetch(`https://accounts.spotify.com/api/token`,
+                {
+                    headers : headers,
+                    method : 'POST',
+                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
+                })
+                .then(response => response.json())                
+                .then(jsonResponse => {
+                    if (!jsonResponse.error) {
+                        accessToken = jsonResponse.access_token
+                        refreshToken = jsonResponse.refresh_token
+                    }
+                })   
+            } catch(error) {
+                console.log(error)
+            } 
         }           
     },
 
     getAuthCode() {
-        if (this.authCode) {
+        if (authCode) {
             return authCode
         } else if (this.parseWindow()) { 
-            return this.parseWindow()                  
+            return authCode                  
         } else {
+            // codeChallenge = this.getCodeChallenge()
             window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&redirect_uri=${redirectURI}`
-            return this.parseWindow()    
+            return this.parseWindow()
         }  
     },
+
+    // getCodeChallenge() {
+        // if (codeChallenge) {
+            // return codeChallenge
+        // } else {
+            // codeVerifier = this.getCodeVerifier()
+            // codeChallenge = generateCodeChallenge(codeVerifier)
+            // return codeChallenge
+        // }
+    // },
+// 
+    // getCodeVerifier() {
+        // if (codeVerifier) {
+            // return codeVerifier
+        // } else {
+            // codeVerifier = generateRandomString()
+            // return codeVerifier
+        // }
+    // },
 
     getProfileInfo() {
         const accessToken = this.getAccessToken()
@@ -101,8 +128,6 @@ const Spotify = {
 
     hasAccessToken() {
         if (accessToken) {
-            return true
-        } else if (this.parseWindow()) {
             return true
         } else {
             return false
