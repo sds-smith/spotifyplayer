@@ -14,30 +14,6 @@ const scope = process.env.REACT_APP_EXPANDED_SCOPE
 const Spotify = {
 
     getAccessToken() {
-        // if (accessToken) {
-            // return accessToken
-        // } else {
-            return this.getCodeToken()
-            .then(token => {
-                accessToken = token
-                return accessToken
-            })
-        // }
-    },
-
-    getImplicitToken() {
-        if (accessToken) {
-            return accessToken
-        }
-        if (this.parseWindow()) { 
-            return this.parseWindow()                  
-        } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=token&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectURI}`
-            return this.parseWindow()    
-        }             
-    },
-
-    getCodeToken() {
             const authCode = this.getAuthCode()
             const authorization = base64urlencode(`${clientId}:${clientSecret}`)
             const headers = {
@@ -64,8 +40,7 @@ const Spotify = {
                 })   
             } catch(error) {
                 console.log(error)
-            } 
-        // }           
+            }         
     },
 
     getAuthCode() {
@@ -75,7 +50,6 @@ const Spotify = {
             authCode = this.parseWindow()
             return authCode                  
         } else {
-            // codeChallenge = this.getCodeChallenge()
             window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&redirect_uri=${redirectURI}`
             authCode = this.parseWindow()
             return authCode
@@ -86,28 +60,7 @@ const Spotify = {
         authCode = ''
     },
 
-    // getCodeChallenge() {
-        // if (codeChallenge) {
-            // return codeChallenge
-        // } else {
-            // codeVerifier = this.getCodeVerifier()
-            // codeChallenge = generateCodeChallenge(codeVerifier)
-            // return codeChallenge
-        // }
-    // },
-// 
-    // getCodeVerifier() {
-        // if (codeVerifier) {
-            // return codeVerifier
-        // } else {
-            // codeVerifier = generateRandomString()
-            // return codeVerifier
-        // }
-    // },
-
-    getProfileInfo() {
-        //const accessToken = this.getAccessToken()
-            
+    getProfileInfo() {            
             const headers = { Authorization : `Bearer ${accessToken}` }
             return fetch('https://api.spotify.com/v1/me',{headers : headers}
             ).then(response => response.json()
@@ -119,21 +72,13 @@ const Spotify = {
     parseWindow() {
         const authCodeMatch = window.location.href.match(/code=([^&]*)/)
         const authStateMatch = window.location.href.match(/state=([^&]*)/)
-        const accessTokenMatch = window.location.href.match(/access_token=([^&]*)/)
-        const expiresInMatch = window.location.href.match(/expires_in=([^&]*)/)
+
         if (authCodeMatch && authStateMatch) {
             if (authStateMatch[1] === state) {
                 const authCode = authCodeMatch[1]
                 return authCode
             }
-        }
-        if (accessTokenMatch && expiresInMatch) { 
-            accessToken = accessTokenMatch[1]
-            const expiresIn = Number(expiresInMatch[1])
-            window.setTimeout(() => accessToken = '', expiresIn * 1000)
-            window.history.pushState("Access Token", null, "/")
-            return accessToken  
-        }     
+        } 
     },
 
     hasAccessToken() {
