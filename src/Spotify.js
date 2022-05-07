@@ -15,6 +15,7 @@ const Spotify = {
 
     getAccessToken() {
             const authCode = this.getAuthCode()
+            const verifier = this.getCodeVerifier()
             const authorization = base64urlencode(`${clientId}:${clientSecret}`)
             const headers = {
                 'Authorization' : authorization,
@@ -25,7 +26,7 @@ const Spotify = {
                 {
                     headers : headers,
                     method : 'POST',
-                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
+                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${verifier}`
                 })
                 .then(response => response.json())                
                 .then(jsonResponse => {
@@ -50,7 +51,8 @@ const Spotify = {
             authCode = this.parseWindow()
             return authCode                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`
+            const challenge = this.getCodeChallenge()
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`
             authCode = this.parseWindow()
             return authCode
         }  
@@ -86,6 +88,25 @@ const Spotify = {
             return true
         } else {
             return false
+        }
+    },
+
+    getCodeVerifier() {
+        if (codeVerifier) {
+            return codeVerifier
+        } else {
+            codeVerifier = generateRandomString()
+            return codeVerifier
+        }
+    },
+
+    getCodeChallenge() {
+        if (codeChallenge) {
+            return codeChallenge
+        } else {
+            const verifier = this.getCodeVerifier
+            codeChallenge = pkce_challenge_from_verifier(verifier)
+            return codeChallenge
         }
     }
 }
