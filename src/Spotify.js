@@ -15,7 +15,6 @@ const Spotify = {
 
     getAccessToken() {
             const authCode = this.getAuthCode()
-            const verifier = this.getCodeVerifier()
             const authorization = base64urlencode(`${clientId}:${clientSecret}`)
             const headers = {
                 'Authorization' : authorization,
@@ -26,16 +25,19 @@ const Spotify = {
                 {
                     headers : headers,
                     method : 'POST',
-                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${verifier}`
+                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
                 })
                 .then(response => response.json())                
                 .then(jsonResponse => {
                     this.resetAuthCode()
                     if (!jsonResponse.error) {
                         accessToken = jsonResponse.access_token
-                        refreshToken = jsonResponse.refresh_token
+                        authCode = jsonResponse.refresh_token
                         const expiresIn = jsonResponse.expires_in
-                        window.setTimeout(() => accessToken = '', expiresIn * 1000)
+                        window.setTimeout(() => {
+                            accessToken = ''
+                            this.getAccessToken()
+                        }, expiresIn * 1000)
                         return accessToken
                     }
                 })   
@@ -51,8 +53,7 @@ const Spotify = {
             authCode = this.parseWindow()
             return authCode                  
         } else {
-            const challenge = this.getCodeChallenge()
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${challenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`
+            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`
             authCode = this.parseWindow()
             return authCode
         }  
@@ -91,24 +92,6 @@ const Spotify = {
         }
     },
 
-    getCodeVerifier() {
-        if (codeVerifier) {
-            return codeVerifier
-        } else {
-            codeVerifier = generateRandomString()
-            return codeVerifier
-        }
-    },
-
-    getCodeChallenge() {
-        if (codeChallenge) {
-            return codeChallenge
-        } else {
-            const verifier = this.getCodeVerifier
-            codeChallenge = pkce_challenge_from_verifier(verifier)
-            return codeChallenge
-        }
-    }
 }
 
 export default Spotify
