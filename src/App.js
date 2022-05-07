@@ -10,6 +10,7 @@ function App() {
   const [profilePic, setProfilePic] = useState(ProfilePic)
   const [userName, setUserName] = useState('')
 
+
   const login = () => {
     Spotify.getAccessToken()
   }
@@ -24,21 +25,23 @@ function App() {
   }
 
   let userProfile
-  if (Spotify.hasAccessToken()) {
-    userProfile = (
-      <UserProfile 
-        getProfileInfo={getProfileInfo}
-        profilePic={profilePic}
-        userName={userName}
-      />  
-    ) 
-  } else {
-    userProfile = <h1>Please Log In</h1>
-  }
+
 
   useEffect(() => {
     login()
   }, [])
+
+    if (Spotify.hasAccessToken()) {
+      userProfile = (
+        <UserProfile 
+          getProfileInfo={getProfileInfo}
+          profilePic={profilePic}
+          userName={userName}
+        />  
+      ) 
+    } else {
+      userProfile = <h1>Please Log In</h1>
+    }
 
   return (
     <div className="App">
