@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 import Spotify from './Spotify.js'
 import UserProfile from './UserProfile/UserProfile';
 import ProfilePic from './icons/default_profile96.png'
