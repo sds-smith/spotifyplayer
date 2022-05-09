@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import { useState } from 'react';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom'
 import Spotify from './Spotify.js'
 import Login from './Login.js';
 import UserProfile from './UserProfile/UserProfile';
@@ -9,16 +9,25 @@ import './App.css';
 
 function App() {
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [authStatus, setAuthStatus] = useState('gate')
   const [profilePic, setProfilePic] = useState(ProfilePic)
   const [userName, setUserName] = useState('')
 
+  const authorize = () => {
+    if (authStatus === 'token') {
+      return <Redirect to='/profile' />
+    }
+    Spotify.getAuthCode()
+    if (Spotify.hasAuthCode()) {
+      login()
+    }
+  }
 
   const login = () => {
     Spotify.getAccessToken()
     .then(() => {
       if (Spotify.hasAccessToken()) {
-      setIsLoggedIn(true)
+      setAuthStatus('token')
       }
     })
   }
@@ -32,17 +41,22 @@ function App() {
     })
   }
 
-    // useEffect(() => {
-      // Spotify.getAuthCode()
-    // }, [])
-
   return (
     <Router >
-        <Route >
-          <Login login={login} />
+
+        <Route exact path='/'>
+          <Login 
+            login={login} 
+            authStatus={authStatus} 
+          />
         </Route>
 
-        <Route >
+        <Route 
+          path='/authorize/*' 
+          component={authorize}
+        />
+
+        <Route path='/profile' >
           <UserProfile 
             getProfileInfo={getProfileInfo}
             profilePic={profilePic}

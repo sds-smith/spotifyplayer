@@ -46,15 +46,15 @@ const Spotify = {
     },
 
     getAuthCode() {
+        console.log('getAuthCode')
         if (authCode) {
             return authCode
         } else if (this.parseWindow()) { 
             authCode = this.parseWindow()
             return authCode                  
         } else {
-            window.location = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`
-            authCode = this.parseWindow()
-            return authCode
+            window.location.replace(`https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`)
+            
         }  
     },
 
@@ -85,6 +85,14 @@ const Spotify = {
 
     hasAccessToken() {
         if (accessToken) {
+            return true
+        } else {
+            return false
+        }
+    },
+
+    hasAuthCode() {
+        if (authCode) {
             return true
         } else {
             return false
