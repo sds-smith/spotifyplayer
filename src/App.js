@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 import Spotify from './Spotify.js'
 import Login from './Login.js';
 import UserProfile from './UserProfile/UserProfile';
@@ -37,7 +37,7 @@ function App() {
     // }, [])
 
   return (
-    <Routes >
+    <Router >
         <Route >
           <Login login={login} />
         </Route>
@@ -49,7 +49,7 @@ function App() {
             userName={userName}
           /> 
         </Route>
-    </Routes>
+    </Router>
 
   );
 }
