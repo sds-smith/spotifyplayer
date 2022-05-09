@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Spotify from './Spotify.js'
+import Login from './Login.js';
 import UserProfile from './UserProfile/UserProfile';
 import ProfilePic from './icons/default_profile96.png'
 import './App.css';
@@ -31,35 +32,25 @@ function App() {
     })
   }
 
-  let userProfile
-
-    if (isLoggedIn) {
-      userProfile = (
-        <UserProfile 
-          getProfileInfo={getProfileInfo}
-          profilePic={profilePic}
-          userName={userName}
-        />  
-      ) 
-    } else {
-      userProfile = (
-        <div>
-          <h1>Please Log In</h1>
-          <button onClick={login}>LOGIN</button>
-        </div>
-      )
-    }
-
-    useEffect(() => {
-      Spotify.getAuthCode()
-    }, [])
+    // useEffect(() => {
+      // Spotify.getAuthCode()
+    // }, [])
 
   return (
-    <div className="App">
-      <header className="App-header">
-        { userProfile }
-      </header>
-    </div>
+    <Routes >
+        <Route >
+          <Login login={login} />
+        </Route>
+
+        <Route >
+          <UserProfile 
+            getProfileInfo={getProfileInfo}
+            profilePic={profilePic}
+            userName={userName}
+          /> 
+        </Route>
+    </Routes>
+
   );
 }
 

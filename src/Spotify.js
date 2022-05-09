@@ -1,8 +1,7 @@
-import { generateRandomString, base64urlencode } from './random'
+import { base64urlencode } from './random'
 
 let authCode
 let accessToken
-let refreshToken
 const codeVerifier = process.env.REACT_APP_AUTH_VERIFIER
 const codeChallenge = process.env.REACT_APP_AUTH_CHALLENGE
 const clientId = process.env.REACT_APP_CLIENT_ID
@@ -32,7 +31,7 @@ const Spotify = {
                     this.resetAuthCode()
                     if (!jsonResponse.error) {
                         accessToken = jsonResponse.access_token
-                        authCode = jsonResponse.refresh_token
+                        // authCode = jsonResponse.refresh_token
                         const expiresIn = jsonResponse.expires_in
                         window.setTimeout(() => {
                             accessToken = ''
