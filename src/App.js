@@ -52,7 +52,7 @@ function App() {
         </Route>
 
         <Route 
-          path='/authorize/*' 
+          path='/callback/' 
           component={authorize}
         />
 
