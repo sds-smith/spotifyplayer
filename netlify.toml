@@ -1,6 +1,7 @@
-
+[build] 
+    command = "sed -i s/REACT_APP_CLIENT_ID_PLACEHOLDER/$REACT_APP_CLIENT_ID/g netlify.toml && npm run build"
 
 [[redirects]]
   from = "/authorize"
-  to = "https://accounts.spotify.com/authorize?response_type=code&client_id=2065aa7bc2874bbc8e9a58c9712204aa&scope=user-read-private&state=935bf8b0eb4f9300ed5a049f8b2c3e0606dfe953bfc2a43469f4bb34&code_challenge=oXasRYQRHMkRqkWqQ68A-OGzY1PRIBoxMFGw3J1wJDk&code_challenge_method=S256&show_dialog=false&redirect_uri=http://localhost:8888/callback/"
+  to = "https://accounts.spotify.com/authorize?response_type=code&client_id=REACT_APP_CLIENT_ID_PLACEHOLDER&scope=user-read-private&state=935bf8b0eb4f9300ed5a049f8b2c3e0606dfe953bfc2a43469f4bb34&code_challenge=oXasRYQRHMkRqkWqQ68A-OGzY1PRIBoxMFGw3J1wJDk&code_challenge_method=S256&show_dialog=false&redirect_uri=http://localhost:8888/callback/"
   status = 200
