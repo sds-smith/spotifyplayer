@@ -7,31 +7,22 @@ const codeChallenge = process.env.REACT_APP_AUTH_CHALLENGE
 const clientId = process.env.REACT_APP_CLIENT_ID
 const clientSecret = process.env.REACT_APP_CLIENT_SECRET
 const state = process.env.REACT_APP_AUTH_STATE
-const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
+// const redirectURI = process.env.REACT_APP_REDIRECT_URI_LOCALHOST
+const redirectURI = process.env.REACT_APP_REDIRECT_URI_NETLIFY_CLI
 const scope = process.env.REACT_APP_EXPANDED_SCOPE
 
 const Spotify = {
 
     getAccessToken() {
             const authCode = this.getAuthCode()
-            const authorization = base64urlencode(`${clientId}:${clientSecret}`)
-            const headers = {
-                'Authorization' : authorization,
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
             try {
-                return fetch(`https://accounts.spotify.com/api/token`,
-                {
-                    headers : headers,
-                    method : 'POST',
-                    body : `grant_type=authorization_code&code=${authCode}&redirect_uri=${redirectURI}&client_id=${clientId}&code_verifier=${codeVerifier}`
-                })
-                .then(response => response.json())                
+                return fetch(`/.netlify/functions/getAccessToken?authCode=${authCode}`)
+                .then(response => response.json())  
+         
                 .then(jsonResponse => {
                     this.resetAuthCode()
                     if (!jsonResponse.error) {
                         accessToken = jsonResponse.access_token
-                        // authCode = jsonResponse.refresh_token
                         const expiresIn = jsonResponse.expires_in
                         window.setTimeout(() => {
                             accessToken = ''
