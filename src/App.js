@@ -46,7 +46,7 @@ function App() {
 
         <Route exact path='/'>
           <Login 
-            login={login} 
+            authorize={authorize} 
             authStatus={authStatus} 
           />
         </Route>

@@ -10,8 +10,7 @@ function Login(props) {
         return (
         <div >
             <h1>Please Log In</h1>
-            <Link to='/authorize/' >AUTH</Link>
-            <button onClick={props.login}>LOGIN</button>
+            <button onClick={props.authorize}>LOGIN</button>
         </div>
         );
 }
