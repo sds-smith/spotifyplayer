@@ -45,7 +45,6 @@ const Spotify = {
             return authCode                  
         } else {
             window.location.replace(`https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256&show_dialog=false&redirect_uri=${redirectURI}`)
-            
         }  
     },
 
